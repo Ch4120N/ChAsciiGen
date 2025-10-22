@@ -16,6 +16,7 @@ init(autoreset=True)
 
 from core.ascii_art import Figlet
 from core.config import PROMPT, COMMAND_NOT_FOUND
+from core.exception import ChAsciiGenParserExit
 from ui.banner import MainBanner, MainSubBanner
 from ui.colorize import colorize
 from ui.display import CenteredBanner
@@ -94,8 +95,8 @@ class Interactive(cmd.Cmd):
             help
                 Shows a full list of available commands.
 
-            help list
-                Displays detailed help for the 'support' command.
+            help show
+                Displays detailed help for the 'show' command.
         """
         if arg:
             try:
@@ -272,6 +273,52 @@ class Interactive(cmd.Cmd):
         self._figlet.showfonts()
 
     def do_show(self, argv):
-        pass
+        """
+        Generate and display ASCII art from input text
 
+        SYNOPSIS:
+            show [OPTIONS] <text>
+
+        OPTIONS:
+            -f <font name>, --font <font name>
+                Use a specific font for rendering. You can list available fonts
+                using the `fonts` command.
+                Example: -f slant
+            
+            -r, --random
+                Use a random font for rendering the ASCII art.
+
+            -h, --help
+                Show this help message for the `show` command.
+
+        DESCRIPTION:
+            The `show` command takes input text and converts it into an ASCII art representation. 
+            You can optionally specify a font or use a random one.
+
+            If no options are provided, the default font (usually 'standard') will be used.
+
+        EXAMPLES:
+            show Hello World
+                Display ASCII art for "Hello World" using the default font.
+
+            show -r Hello World
+                Display ASCII art for "Hello World" using a randomly selected font.
+
+            show -f slant Hello World
+                Display ASCII art for "Hello World" using the 'slant' font.
+
+            show -h
+                Show detailed usage information for this command.
+        """
+        parser = argparse.ArgumentParser(
+                    prog="show",
+                    description="Generate and display ASCII art from input text",
+                    formatter_class=argparse.RawTextHelpFormatter
+                )
+        parser.add_argument('TEXT', type=str, nargs='?', dest='text')
+        parser.add_argument('-r', '--random', action='store_true', dest='random')
+        parser.add_argument('-f', '--font', type=str, default='standard', dest='font')
+        parser.error = lambda message: (
+            self.do_help("show") or (_ for _ in ()).throw(ChAsciiGenParserExit())
+        )
 
