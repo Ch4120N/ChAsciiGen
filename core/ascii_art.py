@@ -6,6 +6,8 @@ from __future__ import annotations
 import shutil
 
 from pyfiglet import FigletFont, figlet_format
+from colorama import Fore, init
+init(autoreset=True)
 
 from ui.decorators import MsgDCR
 
@@ -48,3 +50,31 @@ class Figlet:
                 return ''
         
         return str(figlet_format(text, font=selected_font))
+
+    def highlight(self, keyword: str, text:str):
+        i = 0
+        result = ""
+        while i < len(text):
+            if text[i:i+len(keyword)].lower() == keyword.lower():
+                result += Fore.RED + text[i:i+len(keyword)] + Fore.RESET
+                i += len(keyword)
+            else:
+                result += text[i]
+                i += 1
+        return result
+
+    def serach_font(self, keyword: str):
+        numbered_fonts = [f"{i+1}. {item}" for i, item in enumerate(self._fonts)]
+        highlighted_items = [self.highlight(keyword, font) for font in numbered_fonts]
+        max_len = max(len(item) for item in numbered_fonts) + 2
+        cols = max(1, self._term_width // max_len)
+        rows = [highlighted_items[i:i+cols] for i in range(0, len(highlighted_items), cols)]
+        output_lines = []
+
+        
+        for row in rows:
+            line = ''.join(item.ljust(max_len) for item in row)
+            output_lines.append((' '*4) + line)
+        
+        print('\n'.join(output_lines))
+        print()
