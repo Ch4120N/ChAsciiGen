@@ -8,6 +8,7 @@ from colorama import Fore, init
 init(autoreset=True)
 
 from core.config import (
+    __version__,
     SCRIPT_NAME,
     SCRIPT_DESCRIPTION,
     Config
