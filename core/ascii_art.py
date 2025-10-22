@@ -7,7 +7,7 @@ from pyfiglet import FigletFont
 
 
 
-class figlet:
+class Figlet:
     def __init__(self) -> None:
         self._fonts = FigletFont.getFonts()
         self._total_fonts = len(self._fonts)
