@@ -1,3 +1,3 @@
 # -*- coding: UTF-8 -*-
-# ui/banners.py
+# ui/banner.py
 
