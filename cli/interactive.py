@@ -43,6 +43,8 @@ class Interactive(cmd.Cmd):
             self.input = input
         else:
             self.input = self._colorized_prompt
+        
+        self.do_clear('')
     
     def _colorized_prompt(self, *args):
         print(*args, end='', flush=True)
@@ -229,7 +231,8 @@ class Interactive(cmd.Cmd):
         os.system('cls' 
                   if (os.name == 'nt') else 'clear'
         )
-        MainBanner()
+        banner = self._centered_banner.center_text(MainBanner())
+        self._centered_banner.display(banner)
     
     def do_exit(self, arg):
         """
