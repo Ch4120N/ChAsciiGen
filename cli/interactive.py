@@ -14,7 +14,7 @@ from colorama import Fore, init
 init(autoreset=True)
 
 from core.config import PROMPT, COMMAND_NOT_FOUND
-from ui.banner import MainBanner
+from ui.banner import MainBanner, MainSubBanner
 from ui.colorize import colorize
 from ui.display import CenteredBanner
 
@@ -25,7 +25,7 @@ class Interactive(cmd.Cmd):
 
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
-        self._centered_banner = CenteredBanner()
+        self._centered_banner = CenteredBanner(clear_screen=False)
 
         if (os.name == 'nt' ):
             major_version = int(platform.release())
@@ -231,8 +231,8 @@ class Interactive(cmd.Cmd):
         os.system('cls' 
                   if (os.name == 'nt') else 'clear'
         )
-        banner = self._centered_banner.center_text(MainBanner())
-        self._centered_banner.display(banner)
+        self._centered_banner.display(MainBanner())
+        self._centered_banner.display(MainSubBanner())
     
     def do_exit(self, arg):
         """
