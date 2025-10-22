@@ -10,6 +10,7 @@ import signal
 import shlex
 import platform
 import argparse
+import random 
 
 from colorama import Fore, init
 init(autoreset=True)
@@ -320,32 +321,151 @@ class Interactive(cmd.Cmd):
         parser = argparse.ArgumentParser(
                     prog="show",
                     description="Generate and display ASCII art from input text",
-                    formatter_class=argparse.RawTextHelpFormatter
+                    formatter_class=argparse.RawTextHelpFormatter,
+                    add_help=False
                 )
         parser.add_argument('text', type=str)
-        parser.add_argument('-f', '--font', type=self._str_or_int, default='standard', dest='font')
+        parser.add_argument('-f', '--font', type=str, dest='font')
         parser.add_argument('-r', '--random', action='store_true', dest='random')
-        
+        parser.add_argument('-h', '--help', action='store_true', help='Show help message')
+
         parser.error = lambda message: (
-            self.do_help("show") or (_ for _ in ()).throw(ChAsciiGenParserExit())
+            self.do_help("show") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
         )
 
         try:
-            args = parser.parse_args(argv.split())
+            args = parser.parse_args(shlex.split(argv))
         except SystemExit:
-            MsgDCR.FailureMessage('Invalid command syntax. Please check arguments and try again.')
+            MsgDCR.FailureMessage('Invalid syntax. Use `help save` for usage.')
             return
-        except ChAsciiGenParserExit:
-            return
-        
-        try:
-            main_text = args.text
-            font = args.font
-            random_choice = args.random
-        except Exception:
-            MsgDCR.FailureMessage('Failed to extract parsed arguments')
+        except Exception as e:
+            MsgDCR.FailureMessage(f'Error parsing arguments: {e}')
             return
         
+        if args.help:
+            self.do_help('show')
+            return 
+        
+        if args.font and args.random:
+            MsgDCR.FailureMessage('You cannot use both --font and --random options together.')
+            return
+        
+        font = args.font or 'standard'
+
         if font:
-            self._figlet.text2ascii(main_text, font=font)
+            print(self._figlet.text2ascii(args.text, font=font))
         
+        if args.random:
+            selected_font = random.choice(self._figlet._fonts)
+            print(self._figlet.text2ascii(args.text, font=selected_font))
+    
+    def do_save(self, argv):
+        """
+        Generate and save ASCII art to a file from input text
+
+        SYNOPSIS:
+            save [OPTIONS] <text>
+
+        OPTIONS:
+            -f <font name>, --font <font name>
+                Use a specific font for rendering.
+                Example: -f slant
+
+            -r, --random
+                Use a random font for rendering the ASCII art.
+
+            -a, --all
+                Generate ASCII art using all available fonts and save all to the output file.
+
+            -o <file>, --output <file>
+                Specify the output file path. (Required)
+
+            -h, --help
+                Show this help message for the `save` command.
+
+        DESCRIPTION:
+            The `save` command takes input text and generates ASCII art from it.
+            You can save the output to a file using a specified font, a random font, 
+            or generate art with all available fonts.
+
+            When using the --all option, ASCII art for all fonts will be concatenated 
+            and saved into the specified output file.
+
+        EXAMPLES:
+            save -r "Hello World" -o hello.txt
+                Save ASCII art of "Hello World" with a random font to hello.txt
+
+            save -f slant "Hello World" -o art.txt
+                Save ASCII art of "Hello World" with the 'slant' font to art.txt
+
+            save --all "Test" -o all_fonts.txt
+                Save ASCII art for "Test" using all available fonts into all_fonts.txt
+
+            save -h
+                Show detailed usage information for this command.
+        """
+        parser = argparse.ArgumentParser(
+            prog="save",
+            description="Generate and save ASCII art to a file from input text",
+            formatter_class=argparse.RawTextHelpFormatter,
+            add_help=False
+        )
+        parser.add_argument('text', type=str, help='Text to convert and save')
+        parser.add_argument('-f', '--font', type=str, dest='font', help='Specify a font to use')
+        parser.add_argument('-r', '--random', action='store_true', dest='random', help='Use a random font')
+        parser.add_argument('-a', '--all', action='store_true', dest='all_fonts', help='Generate with all available fonts')
+        parser.add_argument('-o', '--output', type=str, dest='output', required=True, help='Output file path')
+        parser.add_argument('-h', '--help', action='help', help='Show this help message and exit')
+
+        parser.error = lambda message: (
+                    self.do_help("save") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
+                )
+        try:
+            args = parser.parse_args(shlex.split(argv))
+        except SystemExit:
+            MsgDCR.FailureMessage('Invalid syntax. Use `help save` for usage.')
+            return
+        except Exception as e:
+            MsgDCR.FailureMessage(f'Error parsing arguments: {e}')
+            return
+        
+        if args.help:
+            self.do_help('save')
+            return
+    
+        if args.font and args.random:
+            MsgDCR.FailureMessage('You cannot use both --font and --random options together.')
+            return
+
+        if args.all_fonts and (args.font or args.random):
+            MsgDCR.FailureMessage('The --all option cannot be combined with --font or --random.')
+            return
+
+        text_input = " ".join(args.text)
+        output_path = args.output
+
+        outputs = []
+
+        try:
+            if args.all_fonts:
+                fonts = self._figlet._fonts
+                for font in fonts:
+                    art = self._figlet.text2ascii(text_input, font=font)
+                    outputs.append(f"### FONT: {font} ###\n{art}\n\n")
+            else:
+                if args.random:
+                    font = random.choice(self._figlet._fonts)
+                else:
+                    font = args.font or 'standard'
+                art = self._figlet.text2ascii(text_input, font=font)
+                outputs.append(f"### FONT: {font} ###\n{art}\n")
+        except Exception as e:
+            MsgDCR.FailureMessage(f"Failed to generate ASCII art: {e}")
+            return
+
+        try:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.writelines(outputs)
+            MsgDCR.SuccessMessage(f"ASCII art saved successfully to: {output_path}")
+        except Exception as e:
+            MsgDCR.FailureMessage(f"Error writing to file: {e}")
