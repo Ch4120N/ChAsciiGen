@@ -16,7 +16,7 @@ init(autoreset=True)
 from core.config import PROMPT, COMMAND_NOT_FOUND
 from ui.banner import MainBanner
 from ui.colorize import colorize
-
+from ui.display import CenteredBanner
 
 
 class Interactive(cmd.Cmd):
@@ -25,7 +25,8 @@ class Interactive(cmd.Cmd):
 
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
-
+        self._centered_banner = CenteredBanner()
+        
         if (os.name == 'nt' ):
             major_version = int(platform.release())
             if major_version >= 10:
