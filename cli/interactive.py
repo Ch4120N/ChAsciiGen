@@ -350,14 +350,20 @@ class Interactive(cmd.Cmd):
             MsgDCR.FailureMessage('You cannot use both --font and --random options together.')
             return
         
-        font = args.font or 'standard'
-
-        if font:
+        if args.text and (not args.font and not args.random):
+            font = args.font or 'standard'
             print(self._figlet.text2ascii(args.text, font=font))
+            return
+        
+        if args.font:
+            font = args.font or 'standard'
+            print(self._figlet.text2ascii(args.text, font=font))
+            return
         
         if args.random:
             selected_font = random.choice(self._figlet._fonts)
             print(self._figlet.text2ascii(args.text, font=selected_font))
+            return
     
     def do_save(self, argv):
         """
@@ -451,14 +457,14 @@ class Interactive(cmd.Cmd):
                 fonts = self._figlet._fonts
                 for font in fonts:
                     art = self._figlet.text2ascii(text_input, font=font)
-                    outputs.append(f"### FONT: {font} ###\n{art}\n\n")
+                    outputs.append(f"--- FONT: {font} ---\n{art}\n\n")
             else:
                 if args.random:
                     font = random.choice(self._figlet._fonts)
                 else:
                     font = args.font or 'standard'
                 art = self._figlet.text2ascii(text_input, font=font)
-                outputs.append(f"### FONT: {font} ###\n{art}\n")
+                outputs.append(f"--- FONT: {font} ---\n{art}\n")
         except Exception as e:
             MsgDCR.FailureMessage(f"Failed to generate ASCII art: {e}")
             return
