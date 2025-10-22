@@ -21,5 +21,5 @@ def MainSubBanner() -> str:
         f'{Fore.YELLOW}║{Fore.LIGHTWHITE_EX} Simple tool for text to ASCII Art generator {Fore.YELLOW}║\n'
         f'{Fore.YELLOW}║ {Fore.LIGHTGREEN_EX}Author  {Fore.LIGHTWHITE_EX}:  {Fore.LIGHTRED_EX}Ch4120N                          {Fore.YELLOW}║\n'
         f'{Fore.YELLOW}║ {Fore.LIGHTGREEN_EX}Github  {Fore.LIGHTWHITE_EX}:  {Fore.LIGHTRED_EX}Github.com/Ch4120N               {Fore.YELLOW}║\n'
-        f'{Fore.YELLOW}╚═════════════════════════════════════════════╝\n'
+        f'{Fore.YELLOW}╚═════════════════════════════════════════════╝\n\n'
     )
