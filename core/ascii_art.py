@@ -18,10 +18,13 @@ class Figlet:
         max_len = max(len(item) for item in numbered_fonts) + 2
         cols = max(1, self._term_width // max_len)
         rows = [numbered_fonts[i:i+cols] for i in range(0, len(numbered_fonts), cols)]
+        fonts = []
 
         for row in rows:
             line = ""
             for item in row:
                 line += item.ljust(max_len)
-            print(' '*3, line)
-
+            fonts.append((' '*4) + line)
+        
+        print('\n'.join(fonts))
+        print()
