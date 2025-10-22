@@ -338,8 +338,7 @@ class Interactive(cmd.Cmd):
         except SystemExit:
             MsgDCR.FailureMessage('Invalid syntax. Use `help save` for usage.')
             return
-        except Exception as e:
-            MsgDCR.FailureMessage(f'Error parsing arguments: {e}')
+        except Exception:
             return
         
         if args.help:
@@ -362,6 +361,7 @@ class Interactive(cmd.Cmd):
         
         if args.random:
             selected_font = random.choice(self._figlet._fonts)
+            print('-'*4, selected_font, '-'*4)
             print(self._figlet.text2ascii(args.text, font=selected_font))
             return
     
@@ -421,7 +421,7 @@ class Interactive(cmd.Cmd):
         parser.add_argument('-r', '--random', action='store_true', dest='random', help='Use a random font')
         parser.add_argument('-a', '--all', action='store_true', dest='all_fonts', help='Generate with all available fonts')
         parser.add_argument('-o', '--output', type=str, dest='output', required=True, help='Output file path')
-        parser.add_argument('-h', '--help', action='help', help='Show this help message and exit')
+        parser.add_argument('-h', '--help', action='store_true', help='Show help message')
 
         parser.error = lambda message: (
                     self.do_help("save") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
@@ -431,8 +431,7 @@ class Interactive(cmd.Cmd):
         except SystemExit:
             MsgDCR.FailureMessage('Invalid syntax. Use `help save` for usage.')
             return
-        except Exception as e:
-            MsgDCR.FailureMessage(f'Error parsing arguments: {e}')
+        except Exception:
             return
         
         if args.help:
