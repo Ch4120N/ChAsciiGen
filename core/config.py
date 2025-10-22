@@ -3,7 +3,7 @@
 
 SCRIPT_NAME = 'ChAsciiGen'
 
-SCRIPT_DISCRIPTION = 'Simple tool for text to ASCII Art generator'
+SCRIPT_DESCRIPTION = 'Simple tool for text to ASCII Art generator'
 
 class Config:
     pass
