@@ -9,10 +9,12 @@ import cmd
 import signal
 import shlex
 import platform
+import argparse
 
 from colorama import Fore, init
 init(autoreset=True)
 
+from core.ascii_art import figlet
 from core.config import PROMPT, COMMAND_NOT_FOUND
 from ui.banner import MainBanner, MainSubBanner
 from ui.colorize import colorize
@@ -251,7 +253,10 @@ class Interactive(cmd.Cmd):
         sys.exit(0)
     
     def do_list(self, argv):
-        pass
+        args = argv.split()
+
+        if args[0] == 'fonts':
+            figlet.showfonts()
 
     def do_preview(self, argv):
         pass
