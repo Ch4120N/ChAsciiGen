@@ -264,20 +264,57 @@ class Interactive(cmd.Cmd):
     
     def do_fonts(self, argv):
         """
-        Show full list of all fonts
+        List all available fonts, with optional keyword filtering.
 
         SYNOPSIS:
-            fonts
-        
+            fonts [--search <keyword>]
+
+        OPTIONS:
+            --search <keyword>
+                Filter fonts by keyword.
+
         DESCRIPTION:
-            Displays a full, numbered, and neatly formatted list of all available fonts 
-            supported by the pyfiglet library. The fonts are listed in a multi-column,
-            terminal-responsive layout to ensure readability regardless of terminal width.
-        
+            Lists all fonts available in the pyfiglet library.
+            You can use the --search flag to narrow down the list.
+
         EXAMPLES:
             fonts
-                list all available fonts
+                Lists all fonts
+
+            fonts --search block
+                Lists fonts with "block" in their name
         """
+        parser = argparse.ArgumentParser(
+                    prog="fonts",
+                    description="List available fonts",
+                    formatter_class=argparse.RawTextHelpFormatter,
+                    add_help=False
+                )
+        parser.add_argument('--search', type=str, help='Keyword to filter fonts')
+        parser.add_argument('-h', '--help', action='store_true', help='Show help message')
+
+        parser.error = lambda message: (
+                            self.do_help("fonts") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
+                        )
+        try:
+            args = parser.parse_args(shlex.split(argv))
+        except SystemExit:
+            MsgDCR.FailureMessage('Invalid syntax. Use `help fonts` for usage.')
+            return
+        except Exception:
+            return
+        
+        if args.help:
+            self.do_help('fonts')
+            return
+        
+        if args.search:
+            fonts = [f for f in self._figlet._fonts if args.search.lower() in f.lower()]
+            if not fonts:
+                MsgDCR.WarningMessage(f"No fonts found matching {Fore.LIGHTWHITE_EX}'{Fore.LIGHTRED_EX}{args.search}{Fore.LIGHTWHITE_EX}'")
+                return
+            MsgDCR.SuccessMessage(f'Found {Fore.LIGHTWHITE_EX}{len(fonts)}{Fore.LIGHTGREEN_EX} font(s):')
+            
         self._figlet.showfonts()
 
     def do_show(self, argv):
@@ -336,7 +373,7 @@ class Interactive(cmd.Cmd):
         try:
             args = parser.parse_args(shlex.split(argv))
         except SystemExit:
-            MsgDCR.FailureMessage('Invalid syntax. Use `help save` for usage.')
+            MsgDCR.FailureMessage('Invalid syntax. Use `help show` for usage.')
             return
         except Exception:
             return
