@@ -13,14 +13,15 @@ import platform
 from colorama import Fore, init
 init(autoreset=True)
 
-from core.config import PROMPT
+from core.config import PROMPT, COMMAND_NOT_FOUND
 from ui.banner import MainBanner
-
+from ui.colorize import colorize
 
 
 
 class Interactive(cmd.Cmd):
     prompt = PROMPT
+    _nocmd = COMMAND_NOT_FOUND
 
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
@@ -67,6 +68,76 @@ class Interactive(cmd.Cmd):
 
     def emptyline(self) -> None: # type: ignore
         pass
+    
+    def do_help(self, arg):
+        """
+        Display a list of available commands or show help for a specific command.
+
+        SYNOPSIS:
+            help [command]
+
+        DESCRIPTION:
+            The `help` command shows a formatted list of all available commands 
+            in the interface. If a command name is provided as an argument, it will 
+            display detailed help for that specific command.
+
+            When used without arguments, it lists all known commands with a brief 
+            description.
+
+        EXAMPLES:
+            help
+                Shows a full list of available commands.
+
+            help support
+                Displays detailed help for the 'support' command.
+        """
+        if arg:
+            try:
+                func = getattr(self, 'help_' + arg)
+            except AttributeError:
+                try:
+                    doc = getattr(self, 'do_' + arg).__doc__
+                    if doc:
+                        self.stdout.write("%s\n" % str(doc))
+                        return
+                except AttributeError:
+                    pass
+                self.stdout.write("%s\n" % str(self.nohelp % (arg,)))
+                return
+            func()
+        else:
+            names = self.get_names()
+            seen = set()
+            commands = []
+
+            for name in names:
+                if name.startswith("do_"):
+                    cmd_name = name[3:]
+                    if cmd_name in seen:
+                        continue
+                    seen.add(cmd_name)
+                    func = getattr(self, name)
+                    doc = func.__doc__.strip().split("\n")[0] if func.__doc__ else ""
+                    commands.append((cmd_name.upper(), doc))
+                elif name.startswith("help_"):
+                    cmd_name = name[5:]
+                    if cmd_name not in seen:
+                        seen.add(cmd_name)
+                        commands.append((cmd_name.upper(), ""))
+            dic_cmd = []
+            for cmd, desc in sorted(commands):
+                if desc == '':
+                    continue
+                dic_cmd.append(colorize("%BoldGreen", f"\t{cmd:<15}:  ", "%BoldWhite", desc, "%Reset"))
+            self.do_clear('')
+            print('\n'.join(dic_cmd))
+            # self.center_text.display(banner())
+            # panel = TextPanel(border_color=Fore.LIGHTBLUE_EX)
+            # self.center_text.display(panel.build(dic_cmd).splitlines())
+            print()
+    
+    def default(self, line: str) -> None:
+        sys.stdout.write(self._nocmd % (line))
     
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
