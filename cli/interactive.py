@@ -26,7 +26,7 @@ class Interactive(cmd.Cmd):
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
         self._centered_banner = CenteredBanner()
-        
+
         if (os.name == 'nt' ):
             major_version = int(platform.release())
             if major_version >= 10:
@@ -89,7 +89,7 @@ class Interactive(cmd.Cmd):
             help
                 Shows a full list of available commands.
 
-            help support
+            help list
                 Displays detailed help for the 'support' command.
         """
         if arg:
