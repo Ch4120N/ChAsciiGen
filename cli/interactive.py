@@ -253,11 +253,19 @@ class Interactive(cmd.Cmd):
 
         sys.exit(0)
     
-    def do_list(self, argv):
-        args = argv.split()
+    def do_fonts(self, argv):
+        """
+        Show full list of all fonts
 
-        if args[0] == 'fonts':
-            self._figlet.showfonts()
+        SYNOPSIS:
+            fonts
+        
+        DESCRIPTION:
+            Displays a full, numbered, and neatly formatted list of all available fonts 
+            supported by the pyfiglet library. The fonts are listed in a multi-column,
+            terminal-responsive layout to ensure readability regardless of terminal width.
+        """
+        self._figlet.showfonts()
 
     def do_preview(self, argv):
         pass
