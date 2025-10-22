@@ -1,0 +1,6 @@
+{
+    "max_width": 80,
+    "default_font": "standard",
+    "config_file": "config.json",
+    "output_file": ""
+}

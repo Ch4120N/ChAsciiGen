@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 import sys
 import cmd
-import signal
+import json
 import shlex
 import platform
 import argparse
@@ -16,8 +16,14 @@ from colorama import Fore, init
 init(autoreset=True)
 
 from core.ascii_art import Figlet
-from core.config import PROMPT, COMMAND_NOT_FOUND
+from core.config import (
+    PROMPT, 
+    COMMAND_NOT_FOUND, 
+    Config, 
+    DEFAULT_CONFIG
+)
 from core.exception import ChAsciiGenParserExit
+from core.io import IO
 from ui.banner import MainBanner, MainSubBanner
 from ui.decorators import MsgDCR
 from ui.colorize import colorize
@@ -61,25 +67,6 @@ class Interactive(cmd.Cmd):
             return int(value)
         except ValueError:
             return value
-    
-    def complete_command_args(self, COMMAND_ARGS, text, line, *_):
-        """
-        General autocompletion for top-level commands and their arguments.
-        """
-        try:
-            argv = shlex.split(line)
-        except ValueError:
-            return []
-
-        if not argv:
-            return []
-
-        cmd = argv[0]
-        arg_index = len(argv) if line.endswith(" ") else len(argv) - 1
-
-        suggestions = COMMAND_ARGS.get(cmd, {}).get(arg_index, [])
-        return [s for s in suggestions if s.startswith(text)]
-
 
     def emptyline(self) -> None: # type: ignore
         pass
@@ -392,12 +379,12 @@ class Interactive(cmd.Cmd):
             return
         
         if args.text and (not args.font and not args.random):
-            font = args.font or 'standard'
+            font = args.font or Config.DEFAULT_FONT
             print(self._figlet.text2ascii(args.text, font=font))
             return
         
         if args.font:
-            font = args.font or 'standard'
+            font = args.font or Config.DEFAULT_FONT
             print(self._figlet.text2ascii(args.text, font=font, width=args.width))
             return
         
@@ -464,7 +451,7 @@ class Interactive(cmd.Cmd):
         )
         parser.add_argument('text', type=str)
         parser.add_argument('-f', '--font', type=str, dest='font')
-        parser.add_argument('-w', '--width', type=int, default=80, dest='width')
+        parser.add_argument('-w', '--width', type=int, default=Config.MAX_WIDTH, dest='width')
         parser.add_argument('-r', '--random', action='store_true', dest='random')
         parser.add_argument('-a', '--all', action='store_true', dest='all_fonts')
         parser.add_argument('-o', '--output', type=str, dest='output', required=True)
@@ -508,7 +495,7 @@ class Interactive(cmd.Cmd):
                 if args.random:
                     font = random.choice(self._figlet._fonts)
                 else:
-                    font = args.font or 'standard'
+                    font = args.font or Config.DEFAULT_FONT
                 art = self._figlet.text2ascii(text_input, font=font, width=args.width)
                 outputs.append(f"--- FONT: {font} ---\n{art}\n")
         except Exception as e:
@@ -521,3 +508,85 @@ class Interactive(cmd.Cmd):
             MsgDCR.SuccessMessage(f"ASCII art saved successfully to: {output_path}")
         except Exception as e:
             MsgDCR.FailureMessage(f"Error writing to file: {e}")
+
+    def do_config(self, argv):
+        """
+        Configure default settings for ChAsciiGen
+
+        SYNOPSIS:
+            config [OPTIONS]
+
+        OPTIONS:
+            --default-font <font>   Set the default font
+            --max-width <width>     Set the max width of ASCII art
+            --output <path>         Set the default output file
+            --show                  Display current configuration
+            --reset                 Reset configuration to default
+
+        EXAMPLES:
+            config --default-font slant
+            config --output hello.txt
+            config --show
+            config --reset
+        """
+        parser = argparse.ArgumentParser(
+            prog="config",
+            description="Set or show ChAsciiGen configuration",
+            formatter_class=argparse.RawTextHelpFormatter,
+            add_help=False
+        )
+        parser.add_argument('--default-font', type=str)
+        parser.add_argument('--output', type=str)
+        parser.add_argument('--max-width', type=int)
+        parser.add_argument('--show', action='store_true')
+        parser.add_argument('--reset', action='store_true')
+        parser.add_argument('-h', '--help', action='store_true')
+        parser.error = lambda message: (
+                            self.do_help("config") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
+                        )
+        try:
+            args = parser.parse_args(shlex.split(argv))
+        except SystemExit:
+            MsgDCR.FailureMessage('Invalid syntax. Use `help config` for usage.')
+            return
+        except Exception:
+            return
+
+        if args.help:
+            self.do_help("config")
+            return
+
+        config = IO.load_config()
+
+        if args.reset:
+            IO.save_config(DEFAULT_CONFIG.copy())
+            MsgDCR.SuccessMessage("Configuration reset to defaults.")
+            return
+
+        if args.show:
+            MsgDCR.InfoMessage("Current Configuration")
+            for k, v in config.items():
+                MsgDCR.GeneralMessage(f"{k}        : {v}")
+            return
+
+        changed = False
+        if args.default_font:
+            config['default_font'] = args.default_font
+            Config.DEFAULT_FONT = args.default_font
+            changed = True
+
+        if args.output:
+            config['output_file'] = args.output
+            Config.OUTPUT_FILE = args.output
+            changed = True
+        
+        if args.max_width:
+            config['max_width'] = args.max_width
+            Config.MAX_WIDTH = args.max_width
+            changed = True
+        
+        if changed:
+            IO.save_config(config)
+            MsgDCR.SuccessMessage("Configuration updated successfully.")
+        else:
+            MsgDCR.WarningMessage("No changes made to configuration.")

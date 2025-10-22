@@ -25,4 +25,12 @@ COMMAND_NOT_FOUND = f"{Fore.LIGHTRED_EX}{SCRIPT_NAME} {Fore.LIGHTWHITE_EX}: comm
 class Config:
     MAX_WIDTH: int = 80
     DEFAULT_FONT: str = 'standard'
+    CONFIG_FILE: str = 'config.json'
+    OUTPUT_FILE: str = ''
 
+DEFAULT_CONFIG = {
+    'max_width' : Config.MAX_WIDTH,
+    'default_font' : Config.DEFAULT_FONT,
+    'config_file' : Config.CONFIG_FILE,
+    'output_file' : Config.OUTPUT_FILE
+}
