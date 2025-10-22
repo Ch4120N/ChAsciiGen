@@ -19,14 +19,18 @@ except ImportError:
 
 from ui.banner import MainBanner
 from ui.decorators import MsgDCR
-
+from cli.parser import Parser
 
 class ChAsciiGen:
     def __init__(self):
-        pass
+        self.parser = Parser()
 
     def run(self):
-        pass
+        args = self.parser.build_parser()
+
+        if args.interactive:
+            MsgDCR.FailureMessage('Currently interactive mode is disabled!')
+        
 
 
 if __name__ == '__main__':
