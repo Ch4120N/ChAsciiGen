@@ -56,7 +56,7 @@ class Interactive(cmd.Cmd):
         else:
             self.input = self._colorized_prompt
         
-        self.do_clear('')
+        
     
     def _colorized_prompt(self, *args):
         print(*args, end='', flush=True)
@@ -141,6 +141,10 @@ class Interactive(cmd.Cmd):
     def default(self, line: str) -> None:
         sys.stdout.write(self._nocmd % (line))
     
+    def run(self):
+        self.do_clear('')
+        self.cmdloop()
+
     def cmdloop(self, intro=None):
         """Repeatedly issue a prompt, accept input, parse an initial prefix
         off the received input, and dispatch to action methods, passing them
@@ -296,7 +300,7 @@ class Interactive(cmd.Cmd):
             return
         
         if args.search:
-            self._figlet.serach_font(args.search)
+            self._figlet.search_font(args.search)
             return
 
         self._figlet.showfonts()

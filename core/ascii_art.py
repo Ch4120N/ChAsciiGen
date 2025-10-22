@@ -19,7 +19,7 @@ class Figlet:
         self._total_fonts = len(self._fonts)
         self._term_width = shutil.get_terminal_size().columns
     
-    def showfonts(self) -> None:
+    def showfonts(self, margin_left: int = 4) -> None:
         numbered_fonts = [f"{i+1}. {font}" for i, font in enumerate(self._fonts)]
         max_len = max(len(item) for item in numbered_fonts) + 2
         cols = max(1, self._term_width // max_len)
@@ -30,7 +30,7 @@ class Figlet:
             line = ""
             for item in row:
                 line += item.ljust(max_len)
-            fonts.append((' '*4) + line)
+            fonts.append((' '*margin_left) + line)
         
         print('\n'.join(fonts))
         print()
@@ -68,7 +68,7 @@ class Figlet:
         ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
         return ansi_escape.sub('', text)
 
-    def serach_font(self, keyword: str):
+    def search_font(self, keyword: str, margin_left: int = 4, info_mesage: bool = False):
         filtered_fonts = [font for font in self._fonts if keyword.lower() in font.lower()]
         
         if not filtered_fonts:
@@ -90,7 +90,10 @@ class Figlet:
                     item = highlighted_fonts[idx]
                     padding = max_len - len(self.strip_ansi_codes(item))
                     line += item + ' ' * padding
-            output_lines.append('    ' + line)
-
+            output_lines.append((' '*margin_left) + line)
+        
+        if info_mesage:
+            if output_lines:
+                MsgDCR.InfoMessage(f"Founded fonts with containing keyword: {Fore.LIGHTWHITE_EX}'{Fore.LIGHTRED_EX}{keyword}{Fore.LIGHTWHITE_EX}':\n")
         print('\n'.join(output_lines))
         print()

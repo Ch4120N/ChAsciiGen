@@ -26,3 +26,31 @@ class IO:
                 json.dump(data, f, indent=4)
         except Exception as e:
             MsgDCR.FailureMessage(f'Failed to save config: {e}')
+    
+    @staticmethod
+    def save_file(data:str) -> bool:
+        try:
+            if not os.path.exists(Config.OUTPUT_FILE):
+                os.makedirs(os.path.dirname(os.path.realpath(Config.OUTPUT_FILE)), exist_ok=True)
+
+            with open(Config.OUTPUT_FILE, 'w', encoding='utf-8') as f:
+                f.write(data)
+            MsgDCR.SuccessMessage(f"ASCII art saved successfully to: {Config.OUTPUT_FILE}")
+            return True
+        except Exception as e:
+            MsgDCR.FailureMessage(f"Error writing to file: {e}")
+            return False
+    
+    @staticmethod
+    def save_writelines_file(data) -> bool:
+        try:
+            if not os.path.exists(Config.OUTPUT_FILE):
+                os.makedirs(os.path.dirname(os.path.realpath(Config.OUTPUT_FILE)), exist_ok=True)
+
+            with open(Config.OUTPUT_FILE, 'w', encoding='utf-8') as f:
+                f.writelines(data)
+            MsgDCR.SuccessMessage(f"ASCII art saved successfully to: {Config.OUTPUT_FILE}")
+            return True
+        except Exception as e:
+            MsgDCR.FailureMessage(f"Error writing to file: {e}")
+            return False
