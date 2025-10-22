@@ -8,5 +8,6 @@ SCRIPT_NAME = 'ChAsciiGen'
 SCRIPT_DESCRIPTION = 'Simple tool for text to ASCII Art generator'
 
 class Config:
-    pass
+    MAX_WIDTH: int = 80
+    DEFAULT_FONT: str = 'standard'
 
