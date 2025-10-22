@@ -39,12 +39,12 @@ class Figlet:
                 selected_font = self._fonts[font_number - 1]
             else:
                 MsgDCR.FailureMessage('Invalid number! Please enter valid font number.')
-                return
+                return ''
         else:
             if font in self._fonts:
                 selected_font = font
             else:
                 MsgDCR.FailureMessage('Invalid font name! Please enter valid font name.')
-                return
+                return ''
         
         return str(figlet_format(text, font=selected_font))
