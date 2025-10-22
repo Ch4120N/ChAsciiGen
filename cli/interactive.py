@@ -264,10 +264,14 @@ class Interactive(cmd.Cmd):
             Displays a full, numbered, and neatly formatted list of all available fonts 
             supported by the pyfiglet library. The fonts are listed in a multi-column,
             terminal-responsive layout to ensure readability regardless of terminal width.
+        
+        EXAMPLES:
+            fonts
+                list all available fonts
         """
         self._figlet.showfonts()
 
-    def do_preview(self, argv):
+    def do_show(self, argv):
         pass
 
 
