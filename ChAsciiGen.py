@@ -26,11 +26,12 @@ class ChAsciiGen:
         self.parser = Parser()
 
     def run(self):
+        MainBanner()
         args = self.parser.build_parser()
 
         if args.interactive:
             MsgDCR.FailureMessage('Currently interactive mode is disabled!')
-        
+            sys.exit(2)
 
 
 if __name__ == '__main__':

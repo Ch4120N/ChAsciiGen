@@ -24,7 +24,7 @@ class Parser:
             description=SCRIPT_DESCRIPTION,
             formatter_class=HelpFormatter
         )
-        parser.add_argument('text', type=str, 
+        parser.add_argument('text', type=str, nargs='?',
                             help='requirment text for generating Ascii Art', default="ChAsciiArt")
         parser.add_argument("-f", "--format", type=str,
                             help="format style font for generating Ascii Art (Default: standard)", dest="style_format", default=Config.DEFAULT_FONT)
