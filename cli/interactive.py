@@ -13,13 +13,14 @@ import platform
 from colorama import Fore, init
 init(autoreset=True)
 
+from core.config import PROMPT
 from ui.banner import MainBanner
 
 
 
 
 class Interactive(cmd.Cmd):
-    prompt = 'root@ChAsciiGen :~# '
+    prompt = PROMPT
 
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
