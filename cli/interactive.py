@@ -270,7 +270,7 @@ class Interactive(cmd.Cmd):
             fonts [--search <keyword>]
 
         OPTIONS:
-            --search <keyword>
+            -s, --search <keyword>
                 Filter fonts by keyword.
 
         DESCRIPTION:
@@ -290,7 +290,7 @@ class Interactive(cmd.Cmd):
                     formatter_class=argparse.RawTextHelpFormatter,
                     add_help=False
                 )
-        parser.add_argument('--search', type=str, help='Keyword to filter fonts')
+        parser.add_argument('-s', '--search', type=str, help='Keyword to filter fonts', dest='search')
         parser.add_argument('-h', '--help', action='store_true', help='Show help message')
 
         parser.error = lambda message: (
@@ -309,12 +309,9 @@ class Interactive(cmd.Cmd):
             return
         
         if args.search:
-            fonts = [f for f in self._figlet._fonts if args.search.lower() in f.lower()]
-            if not fonts:
-                MsgDCR.WarningMessage(f"No fonts found matching {Fore.LIGHTWHITE_EX}'{Fore.LIGHTRED_EX}{args.search}{Fore.LIGHTWHITE_EX}'")
-                return
-            MsgDCR.SuccessMessage(f'Found {Fore.LIGHTWHITE_EX}{len(fonts)}{Fore.LIGHTGREEN_EX} font(s):')
-            
+            self._figlet.serach_font(args.search)
+            return
+
         self._figlet.showfonts()
 
     def do_show(self, argv):
@@ -325,10 +322,14 @@ class Interactive(cmd.Cmd):
             show [OPTIONS] <text>
 
         OPTIONS:
-            -f <font name>, --font <font name>
+            -f, --font <font name>
                 Use a specific font for rendering. You can list available fonts
                 using the `fonts` command.
                 Example: -f slant
+            
+            -w, --width <ascii width>
+                Use a specific width for output ASCII art
+                Example: -w 100
             
             -r, --random
                 Use a random font for rendering the ASCII art.
@@ -343,15 +344,18 @@ class Interactive(cmd.Cmd):
             If no options are provided, the default font (usually 'standard') will be used.
 
         EXAMPLES:
-            show Hello World
+            show "Hello World"
                 Display ASCII art for "Hello World" using the default font.
 
-            show -r Hello World
+            show -r "Hello World"
                 Display ASCII art for "Hello World" using a randomly selected font.
 
-            show -f slant Hello World
+            show -f slant "Hello World"
                 Display ASCII art for "Hello World" using the 'slant' font.
-
+            
+            show -f slant -w 100 "Hello World"
+                Display ASCII art for "Hello World" using the slant font and change output width 100
+            
             show -h
                 Show detailed usage information for this command.
         """
@@ -363,6 +367,7 @@ class Interactive(cmd.Cmd):
                 )
         parser.add_argument('text', type=str)
         parser.add_argument('-f', '--font', type=str, dest='font')
+        parser.add_argument('-w', '--width', type=int, default=80, dest='width')
         parser.add_argument('-r', '--random', action='store_true', dest='random')
         parser.add_argument('-h', '--help', action='store_true', help='Show help message')
 
@@ -393,13 +398,13 @@ class Interactive(cmd.Cmd):
         
         if args.font:
             font = args.font or 'standard'
-            print(self._figlet.text2ascii(args.text, font=font))
+            print(self._figlet.text2ascii(args.text, font=font, width=args.width))
             return
         
         if args.random:
             selected_font = random.choice(self._figlet._fonts)
             print('-'*4, selected_font, '-'*4)
-            print(self._figlet.text2ascii(args.text, font=selected_font))
+            print(self._figlet.text2ascii(args.text, font=selected_font, width=args.width))
             return
     
     def do_save(self, argv):
@@ -410,17 +415,21 @@ class Interactive(cmd.Cmd):
             save [OPTIONS] <text>
 
         OPTIONS:
-            -f <font name>, --font <font name>
+            -f, --font <font name>
                 Use a specific font for rendering.
                 Example: -f slant
 
+            -w, --width <ascii width>
+                Use a specific width for output ASCII art
+                Example: -w 100
+            
             -r, --random
                 Use a random font for rendering the ASCII art.
 
             -a, --all
                 Generate ASCII art using all available fonts and save all to the output file.
 
-            -o <file>, --output <file>
+            -o, --output <file>
                 Specify the output file path. (Required)
 
             -h, --help
@@ -453,12 +462,13 @@ class Interactive(cmd.Cmd):
             formatter_class=argparse.RawTextHelpFormatter,
             add_help=False
         )
-        parser.add_argument('text', type=str, help='Text to convert and save')
-        parser.add_argument('-f', '--font', type=str, dest='font', help='Specify a font to use')
-        parser.add_argument('-r', '--random', action='store_true', dest='random', help='Use a random font')
-        parser.add_argument('-a', '--all', action='store_true', dest='all_fonts', help='Generate with all available fonts')
-        parser.add_argument('-o', '--output', type=str, dest='output', required=True, help='Output file path')
-        parser.add_argument('-h', '--help', action='store_true', help='Show help message')
+        parser.add_argument('text', type=str)
+        parser.add_argument('-f', '--font', type=str, dest='font')
+        parser.add_argument('-w', '--width', type=int, default=80, dest='width')
+        parser.add_argument('-r', '--random', action='store_true', dest='random')
+        parser.add_argument('-a', '--all', action='store_true', dest='all_fonts')
+        parser.add_argument('-o', '--output', type=str, dest='output', required=True)
+        parser.add_argument('-h', '--help', action='store_true')
 
         parser.error = lambda message: (
                     self.do_help("save") or (_ for _ in ()).throw(ChAsciiGenParserExit(message))
@@ -492,14 +502,14 @@ class Interactive(cmd.Cmd):
             if args.all_fonts:
                 fonts = self._figlet._fonts
                 for font in fonts:
-                    art = self._figlet.text2ascii(text_input, font=font)
+                    art = self._figlet.text2ascii(text_input, font=font, width=args.width)
                     outputs.append(f"--- FONT: {font} ---\n{art}\n\n")
             else:
                 if args.random:
                     font = random.choice(self._figlet._fonts)
                 else:
                     font = args.font or 'standard'
-                art = self._figlet.text2ascii(text_input, font=font)
+                art = self._figlet.text2ascii(text_input, font=font, width=args.width)
                 outputs.append(f"--- FONT: {font} ---\n{art}\n")
         except Exception as e:
             MsgDCR.FailureMessage(f"Failed to generate ASCII art: {e}")

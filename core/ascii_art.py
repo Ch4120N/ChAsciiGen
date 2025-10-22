@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import shutil
+import re
 
 from pyfiglet import FigletFont, figlet_format
 from colorama import Fore, init
@@ -34,7 +35,7 @@ class Figlet:
         print('\n'.join(fonts))
         print()
     
-    def text2ascii(self, text:str, font: str = 'standard'):
+    def text2ascii(self, text:str, font: str = 'standard', width: int = 80):
         if font.isdigit():
             font_number = int(font)
             if 1 <= font_number <= self._total_fonts:
@@ -49,7 +50,7 @@ class Figlet:
                 MsgDCR.FailureMessage('Invalid font name! Please enter valid font name.')
                 return ''
         
-        return str(figlet_format(text, font=selected_font))
+        return str(figlet_format(text, font=selected_font, width=width))
 
     def highlight(self, keyword: str, text:str):
         i = 0
@@ -63,18 +64,33 @@ class Figlet:
                 i += 1
         return result
 
-    def serach_font(self, keyword: str):
-        numbered_fonts = [f"{i+1}. {item}" for i, item in enumerate(self._fonts)]
-        highlighted_items = [self.highlight(keyword, font) for font in numbered_fonts]
-        max_len = max(len(item) for item in numbered_fonts) + 2
-        cols = max(1, self._term_width // max_len)
-        rows = [highlighted_items[i:i+cols] for i in range(0, len(highlighted_items), cols)]
-        output_lines = []
+    def strip_ansi_codes(self, text: str) -> str:
+        ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
+        return ansi_escape.sub('', text)
 
+    def serach_font(self, keyword: str):
+        filtered_fonts = [font for font in self._fonts if keyword.lower() in font.lower()]
         
-        for row in rows:
-            line = ''.join(item.ljust(max_len) for item in row)
-            output_lines.append((' '*4) + line)
-        
+        if not filtered_fonts:
+            MsgDCR.WarningMessage(f"No fonts found containing keyword: {Fore.LIGHTWHITE_EX}'{Fore.LIGHTRED_EX}{keyword}{Fore.LIGHTWHITE_EX}'")
+            return
+
+        numbered_fonts_raw = [f"{i+1}. {font}" for i, font in enumerate(filtered_fonts)]
+        max_len = max(len(self.strip_ansi_codes(item)) for item in numbered_fonts_raw) + 4
+        cols = max(1, self._term_width // max_len)
+        rows = (len(numbered_fonts_raw) + cols - 1) // cols
+        highlighted_fonts = [self.highlight(keyword, item) for item in numbered_fonts_raw]
+
+        output_lines = []
+        for row in range(rows):
+            line = ''
+            for col in range(cols):
+                idx = row * cols + col
+                if idx < len(highlighted_fonts):
+                    item = highlighted_fonts[idx]
+                    padding = max_len - len(self.strip_ansi_codes(item))
+                    line += item + ' ' * padding
+            output_lines.append('    ' + line)
+
         print('\n'.join(output_lines))
         print()
