@@ -14,7 +14,7 @@ import argparse
 from colorama import Fore, init
 init(autoreset=True)
 
-from core.ascii_art import figlet
+from core.ascii_art import Figlet
 from core.config import PROMPT, COMMAND_NOT_FOUND
 from ui.banner import MainBanner, MainSubBanner
 from ui.colorize import colorize
@@ -28,6 +28,7 @@ class Interactive(cmd.Cmd):
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
         self._centered_banner = CenteredBanner(clear_screen=False)
+        self._figlet = Figlet()
 
         if (os.name == 'nt' ):
             major_version = int(platform.release())
@@ -256,7 +257,7 @@ class Interactive(cmd.Cmd):
         args = argv.split()
 
         if args[0] == 'fonts':
-            figlet.showfonts()
+            self._figlet.showfonts()
 
     def do_preview(self, argv):
         pass
