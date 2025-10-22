@@ -8,19 +8,19 @@ init(autoreset=True)
 class StatusDecorator:
     def __init__(self):
         self.PASS = Style.BRIGHT + Fore.GREEN + \
-            "\n [ " + Style.BRIGHT + Fore.WHITE + "+" + \
+            "[ " + Style.BRIGHT + Fore.WHITE + "+" + \
             Style.BRIGHT + Fore.GREEN + " ] " + Style.RESET_ALL
         self.FAIL = Style.BRIGHT + Fore.RED + \
-            "\n [ " + Style.BRIGHT + Fore.WHITE + "-" + \
+            "[ " + Style.BRIGHT + Fore.WHITE + "-" + \
             Style.BRIGHT + Fore.RED + " ] " + Style.RESET_ALL
         self.WARN = Style.BRIGHT + Fore.YELLOW + \
-            "\n [ " + Style.BRIGHT + Fore.WHITE + "!" + \
+            "[ " + Style.BRIGHT + Fore.WHITE + "!" + \
             Style.BRIGHT + Fore.YELLOW + " ] " + Style.RESET_ALL
         self.HEAD = Style.BRIGHT + Fore.CYAN + \
-            "\n [ " + Style.BRIGHT + Fore.WHITE + "::" + \
+            "[ " + Style.BRIGHT + Fore.WHITE + "::" + \
             Style.BRIGHT + Fore.CYAN + " ] " + Style.RESET_ALL
         self.INFO = Style.BRIGHT + Fore.CYAN + \
-            "\n [ " + Style.BRIGHT + Fore.WHITE + "*" + \
+            "[ " + Style.BRIGHT + Fore.WHITE + "*" + \
             Style.BRIGHT + Fore.CYAN + " ] " + Style.RESET_ALL
         self.STDS = "           "
 
