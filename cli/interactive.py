@@ -18,6 +18,7 @@ from core.ascii_art import Figlet
 from core.config import PROMPT, COMMAND_NOT_FOUND
 from core.exception import ChAsciiGenParserExit
 from ui.banner import MainBanner, MainSubBanner
+from ui.decorators import MsgDCR
 from ui.colorize import colorize
 from ui.display import CenteredBanner
 
@@ -53,7 +54,13 @@ class Interactive(cmd.Cmd):
     def _colorized_prompt(self, *args):
         print(*args, end='', flush=True)
         return input()
-
+    
+    def _str_or_int(self, value: str | int) -> str | int:
+        try:
+            return int(value)
+        except ValueError:
+            return value
+    
     def complete_command_args(self, COMMAND_ARGS, text, line, *_):
         """
         General autocompletion for top-level commands and their arguments.
@@ -315,10 +322,30 @@ class Interactive(cmd.Cmd):
                     description="Generate and display ASCII art from input text",
                     formatter_class=argparse.RawTextHelpFormatter
                 )
-        parser.add_argument('TEXT', type=str, nargs='?', dest='text')
+        parser.add_argument('text', type=str)
+        parser.add_argument('-f', '--font', type=self._str_or_int, default='standard', dest='font')
         parser.add_argument('-r', '--random', action='store_true', dest='random')
-        parser.add_argument('-f', '--font', type=str, default='standard', dest='font')
+        
         parser.error = lambda message: (
             self.do_help("show") or (_ for _ in ()).throw(ChAsciiGenParserExit())
         )
 
+        try:
+            args = parser.parse_args(argv.split())
+        except SystemExit:
+            MsgDCR.FailureMessage('Invalid command syntax. Please check arguments and try again.')
+            return
+        except ChAsciiGenParserExit:
+            return
+        
+        try:
+            main_text = args.text
+            font = args.font
+            random_choice = args.random
+        except Exception:
+            MsgDCR.FailureMessage('Failed to extract parsed arguments')
+            return
+        
+        if font:
+            self._figlet.text2ascii(main_text, font=font)
+        
