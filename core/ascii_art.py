@@ -1,10 +1,13 @@
 # -*- coding: UTF-8 -*-
 # core/ascii_art.py
 
+from __future__ import annotations
+
 import shutil
 
-from pyfiglet import FigletFont
+from pyfiglet import FigletFont, figlet_format
 
+from ui.decorators import MsgDCR
 
 
 class Figlet:
@@ -28,3 +31,20 @@ class Figlet:
         
         print('\n'.join(fonts))
         print()
+    
+    def text2ascii(self, text:str, font: str = 'standard'):
+        if font.isdigit():
+            font_number = int(font)
+            if 1 <= font_number <= self._total_fonts:
+                selected_font = self._fonts[font_number - 1]
+            else:
+                MsgDCR.FailureMessage('Invalid number! Please enter valid font number.')
+                return
+        else:
+            if font in self._fonts:
+                selected_font = font
+            else:
+                MsgDCR.FailureMessage('Invalid font name! Please enter valid font name.')
+                return
+        
+        return str(figlet_format(text, font=selected_font))
