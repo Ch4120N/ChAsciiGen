@@ -8,16 +8,42 @@ import sys
 import cmd
 import signal
 import shlex
+import platform
 
 from colorama import Fore, init
 init(autoreset=True)
 
 from ui.banner import MainBanner
 
+
+
+
 class Interactive(cmd.Cmd):
     prompt = 'root@ChAsciiGen :~# '
+
     def __init__(self, completekey: str = "tab", stdin = None, stdout = None) -> None:
         super().__init__(completekey, stdin, stdout)
+
+        if (os.name == 'nt' ):
+            major_version = int(platform.release())
+            if major_version >= 10:
+                self._support_colored_prompt = True
+                self._readline = True
+            else:
+                self._support_colored_prompt = False
+                self._readline = False
+        else:
+            self._support_colored_prompt = True
+            self._readline = True
+        
+        if self._support_colored_prompt:
+            self.input = input
+        else:
+            self.input = self._colorized_prompt
+    
+    def _colorized_prompt(self, *args):
+        print(*args, end='', flush=True)
+        return input()
 
     def complete_command_args(self, COMMAND_ARGS, text, line, *_):
         """
@@ -49,14 +75,15 @@ class Interactive(cmd.Cmd):
         """
 
         self.preloop()
-        if self.use_rawinput and self.completekey:
-            try:
-                import readline
-                self.old_completer = readline.get_completer() # type: ignore
-                readline.set_completer(self.complete) # type: ignore
-                readline.parse_and_bind(self.completekey+": complete") # type: ignore
-            except ImportError:
-                pass
+        if self._readline:
+            if self.use_rawinput and self.completekey:
+                try:
+                    import readline
+                    self.old_completer = readline.get_completer() # type: ignore
+                    readline.set_completer(self.complete) # type: ignore
+                    readline.parse_and_bind(self.completekey+": complete") # type: ignore
+                except ImportError:
+                    pass
         try:
             if intro is not None:
                 self.intro = intro
@@ -69,7 +96,7 @@ class Interactive(cmd.Cmd):
                 else:
                     if self.use_rawinput:
                         try:
-                            line = input(self.prompt)
+                            line = self.input(self.prompt)
                         except EOFError:
                             line = 'EOF'
                         except KeyboardInterrupt:
@@ -88,12 +115,13 @@ class Interactive(cmd.Cmd):
                 stop = self.postcmd(stop, line)
             self.postloop()
         finally:
-            if self.use_rawinput and self.completekey:
-                try:
-                    import readline
-                    readline.set_completer(self.old_completer) # type: ignore
-                except ImportError:
-                    pass
+            if self._readline:
+                if self.use_rawinput and self.completekey:
+                    try:
+                        import readline
+                        readline.set_completer(self.old_completer) # type: ignore
+                    except ImportError:
+                        pass
 
     def do_clear(self, arg):
         """
@@ -151,4 +179,5 @@ class Interactive(cmd.Cmd):
 
     def do_preview(self, argv):
         pass
+
 
