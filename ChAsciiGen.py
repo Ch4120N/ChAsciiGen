@@ -127,7 +127,6 @@ class ChAsciiGen:
                 outputs.append(f"--- FONT: {f} ---\n{art}\n\n")
 
             IO.save_writelines_file(outputs)
-            MsgDCR.SuccessMessage(f'All ASCII arts saved successfully to: {Config.OUTPUT_FILE}')
             return 0
 
         # --- Determine which font to use ---
@@ -142,12 +141,7 @@ class ChAsciiGen:
 
         # --- Save or print the result ---
         if output_file:
-            if IO.save_file(self._temp_str):
-                MsgDCR.SuccessMessage(f'ASCII art saved successfully to: {Config.OUTPUT_FILE}')
-                return 0
-            else:
-                MsgDCR.FailureMessage('Error writing to output file.')
-                return 1
+            IO.save_file(self._temp_str)
         else:
             print(self._temp_str)
             return 0
