@@ -96,7 +96,7 @@ If you find this tool useful, consider donating:
 ## 🚨 Reporting Issues
 > If you encounter bugs, configuration issues, or unexpected behavior, please reach out: 
 📩 Ch4120N@Proton.me
-
+---
 <div align="center">
 
 “Turning plain text into ASCII masterpieces — one line at a time.”
